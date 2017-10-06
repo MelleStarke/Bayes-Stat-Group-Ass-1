@@ -154,11 +154,13 @@ samples2 = coda.samples(jagsmodel2,
 
 # plot/interpret the results
 mcmcsummary2 = summary(samples2)
-mcmcsummary2 $ statistics
-
+statistics <-mcmcsummary2 $ statistics
+stat_mu <- statistics[1][1]
+stat_sigma <- statistics[2][1]
 plot2_mu <- plotPost(samples2[,1], xlab = "mu", ylab = "P(mu)")
 plot2_sigma <- plotPost(samples2[,2], xlab = "sigma", ylab = "P(sigma)")
 
+reconstructed_gaussian <- plotGaussian(x,stat_mu,stat_sigma)
 
 #----------   Model 3: the wrong model   --------------
 
