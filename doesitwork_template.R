@@ -161,6 +161,7 @@ plot2_mu <- plotPost(samples2[,1], xlab = "mu", ylab = "P(mu)")
 plot2_sigma <- plotPost(samples2[,2], xlab = "sigma", ylab = "P(sigma)")
 
 reconstructed_gaussian <- plotGaussian(x,stat_mu,stat_sigma)
+original_gaussian      <- plotGaussian(x,mu,sigma)
 
 #----------   Model 3: the wrong model   --------------
 
