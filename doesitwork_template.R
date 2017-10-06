@@ -85,7 +85,6 @@ samples = coda.samples(jagsmodel1,
                        n.iter=mcmciterations)
 
 # plot/interpret the results
-
 mcmcsummary = summary(samples)
 mcmcsummary $ statistics
 
@@ -96,7 +95,7 @@ plot1 <- plotPost(samples, xlab = "mu", ylab = "P(mu)")
 
 # Set the initial parameters
 sigma = 2.0
-N = 10
+N = 100
 mu = 10
 a = 1
 b = 1
