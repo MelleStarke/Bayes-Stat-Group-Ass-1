@@ -23,7 +23,7 @@ observations <- rep(0,N)
 
 #generate data
 
-for(i in N){
+for(i in 1:N){
 
   #group: 0 is guessing, 1 is studied
   group <- sample(1,x = c(0,1), prob = c(0.5,0.5))
@@ -38,10 +38,11 @@ for(i in N){
   
   #now generate 40 answers for student code with 0 for wrong, 1 for correct
   answers <- rep(0,M)
-  for(m in M){
-    answers[m] <- sample(1,x = c(0,1), prob = c((1-answerProb), answerProb))
+  for(m in 1:M){
+    answer <- sample(1,x = c(0,1), prob = c((1-answerProb), answerProb))
+    answers[m] <- answer
   }
   correctAnswers <- Reduce("+",answers)
   observations[i] <- correctAnswers
-  
 }
+observations
