@@ -46,3 +46,4 @@ for(i in 1:N){
   observations[i] <- correctAnswers
 }
 observations
+hist(observations, breaks = 10)
