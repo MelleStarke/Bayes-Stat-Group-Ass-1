@@ -34,7 +34,7 @@ plotGaussian <- function(data, mean, sd) {
 
 sigma = 2.0
 N = 1000
-mu = 5
+mu = 10
 
 # Generate observations here
 x = rep(0, N)
