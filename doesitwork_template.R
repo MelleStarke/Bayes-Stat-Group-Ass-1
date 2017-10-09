@@ -96,7 +96,7 @@ plot1 <- plotPost(samples, xlab = "mu", ylab = "P(mu)")
 
 # Set the initial parameters
 sigma = 2.0
-N = 100
+N = 1000
 mu = 10
 a = 1
 b = 1
