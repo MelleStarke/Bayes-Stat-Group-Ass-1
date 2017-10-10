@@ -1,29 +1,28 @@
-require(rjags)
-require(coda)
-require(BEST)
-require(stats)
+library(rjags)
+library(coda)
+library(BEST)
+library(stats)
 source("DBDA2E-utilities.R")
 
 #number of students
-N <- 15
+M <- 15
 
 #number of questions
-M <-40
+N <-40
 
 #Probability for guessing students
-aGuess <- 10
-bGuess <- 10
+pGuess <- 0.5
 
 #Probability for studying students
 aStudy <- 16
 bStudy <- 4
 
 
-observations <- rep(0,N)
+observations <- rep(0,M)
 
 #generate data
 
-for(i in 1:N){
+for(i in 1:M){
 
   #group: 0 is guessing, 1 is studied
   group <- sample(1,x = c(0,1), prob = c(0.5,0.5))
@@ -33,17 +32,13 @@ for(i in 1:N){
     answerProb <- rbeta(1,aStudy,bStudy)
   }
   else{                          #guessing
-    answerProb <- rbeta(1,aGuess,bGuess)
+    answerProb <- pGuess
   }  
   
   #now generate 40 answers for student code with 0 for wrong, 1 for correct
-  answers <- rep(0,M)
-  for(m in 1:M){
-    answer <- sample(1,x = c(0,1), prob = c((1-answerProb), answerProb))
-    answers[m] <- answer
-  }
-  correctAnswers <- Reduce("+",answers)
+
+  correctAnswers <- rbinom(n=1,prob=answerProb, size=N)
   observations[i] <- correctAnswers
 }
 observations
-hist(observations, breaks = 4)
+hist(observations, breaks = 10)
