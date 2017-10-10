@@ -11,12 +11,12 @@ N <- 15
 M <-40
 
 #Probability for guessing students
-aGuess <- 1
-bGuess <- 1
+aGuess <- 10
+bGuess <- 10
 
 #Probability for studying students
-aStudy <- 8
-bStudy <- 2
+aStudy <- 16
+bStudy <- 4
 
 
 observations <- rep(0,N)
@@ -46,4 +46,4 @@ for(i in 1:N){
   observations[i] <- correctAnswers
 }
 observations
-hist(observations, breaks = 10)
+hist(observations, breaks = 4)
