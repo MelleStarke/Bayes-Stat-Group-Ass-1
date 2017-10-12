@@ -15,6 +15,7 @@ m = 15
 a = 40
 b = 10
 pStudy = rbeta(1,a,b)
+cat(pStudy, " this is our actual probability of studying")
 pRandom = 0.5
 #result vector
 results <- rep(0,m)
@@ -39,7 +40,7 @@ hist(results,10)
 
 # THE DATA
 n = 40
-k = c(19, 20, 16, 23, 22, 30, 38, 29, 34, 35, 35, 32, 37, 36, 33)
+#k = c(19, 20, 16, 23, 22, 30, 38, 29, 34, 35, 35, 32, 37, 36, 33)
 p = length(k)
 pi <- c(0.5,0.5)
 
@@ -64,7 +65,7 @@ exammodel1.string = "
 exammodel1.spec = textConnection(exammodel1.string)
 
 # SAMPLING PARAMETERS
-niter = 100
+niter = 10000
 nchains = 4
 a_hat = 1
 b_hat = 1
