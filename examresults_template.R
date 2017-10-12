@@ -67,7 +67,7 @@ exammodel1.spec = textConnection(exammodel1.string)
 niter = 10000
 nchains = 4
 a_hat = 1
-b_hat = 100000000000000000
+b_hat = 1
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel1 <- jags.model(exammodel1.spec,
@@ -76,7 +76,6 @@ jagsmodel1 <- jags.model(exammodel1.spec,
                                'b_hat' = b_hat,
                                'm' = p,
                                'n' = n,
-                               'pStudy' = pStudy,
                                'pGuess' = pRandom
                                ),
                    n.chains = nchains)
@@ -91,6 +90,7 @@ model1samples = coda.samples(jagsmodel1,
 mcmcsummary_model1 = summary(model1samples)
 mcmcsummary_model1 $ statistics
 plotPost(model1samples)
+diagMCMC(codaObject = model1samples, parName = 'pStudy')
 
 #----------   Model 2: exam scores with individual differences   --------------
 
