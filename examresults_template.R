@@ -12,7 +12,9 @@ source("DBDA2E-utilities.R")
 
 n = 40
 m = 15
-pStudy = 0.8
+a = 40
+b = 10
+pStudy = rbeta(1,a,b)
 pRandom = 0.5
 #result vector
 results <- rep(0,m)
@@ -44,6 +46,10 @@ pi <- c(0.5,0.5)
 # THE MODEL
 exammodel1.string = "
   model {
+
+  #prior
+  pStudy ~ dbeta(a_hat,b_hat)
+
   for(i in 1:m){
   group[i] ~ dcat(pi)
   
@@ -58,15 +64,16 @@ exammodel1.string = "
 exammodel1.spec = textConnection(exammodel1.string)
 
 # SAMPLING PARAMETERS
-niter = 10000
+niter = 100
 nchains = 4
-
-pStudy_hat <- 0.5
-pGuess_hat <- 0.5
+a_hat = 1
+b_hat = 1
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel1 <- jags.model(exammodel1.spec,
                    data = list('k' = k,
+                               'a_hat' = a_hat,
+                               'b_hat' = b_hat,
                                'm' = p,
                                'n' = n,
                                'pStudy' = pStudy,
@@ -76,7 +83,7 @@ jagsmodel1 <- jags.model(exammodel1.spec,
 
 # Collect samples to approximate the posterior distribution.
 model1samples = coda.samples(jagsmodel1,
-                           c('group'), # which variables do you want to model
+                           c('pStudy'), # which variables do you want to model
                            n.iter = niter)
 
 
