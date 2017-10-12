@@ -90,6 +90,7 @@ model1samples = coda.samples(jagsmodel1,
 mcmcsummary_model1 = summary(model1samples)
 mcmcsummary_model1 $ statistics
 plotPost(model1samples)
+diagMCMC(codaObject = model1samples, parName = 'pStudy')
 
 #----------   Model 2: exam scores with individual differences   --------------
 
