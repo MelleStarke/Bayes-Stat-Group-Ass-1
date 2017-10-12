@@ -18,7 +18,7 @@ pStudy = rbeta(1,a,b)
 cat(pStudy, " this is our actual probability of studying")
 pRandom = 0.5
 #result vector
-results <- rep(0,m)
+k <- rep(0,m)
 #repeat for 15 students
 for(i in 1:m){
   #choose group: 0 = guessing, 1 = studied
@@ -33,10 +33,10 @@ for(i in 1:m){
   }
   #generate amount of correct answers
   correctAnswers <- rbinom(n=1,size=n,prob=pCorrect)
-  results[i] <- correctAnswers
+  k[i] <- correctAnswers
 }
 
-hist(results,10)
+hist(k,10)
 
 # THE DATA
 n = 40
@@ -52,9 +52,8 @@ exammodel1.string = "
   pStudy ~ dbeta(a_hat,b_hat)
 
   for(i in 1:m){
-  group[i] ~ dcat(pi)
-  
-  theta[i] <- equals(group[i],0)*pGuess + equals(group[i],1)*pStudy
+  group[i] ~ dbern(0.5)
+  theta[i] <- ifelse(group[i]==0,pGuess,pStudy)
   k[i] ~ dbin(theta[i],n)  
 
   }
@@ -68,7 +67,7 @@ exammodel1.spec = textConnection(exammodel1.string)
 niter = 10000
 nchains = 4
 a_hat = 1
-b_hat = 1
+b_hat = 100000000000000000
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel1 <- jags.model(exammodel1.spec,
@@ -78,8 +77,8 @@ jagsmodel1 <- jags.model(exammodel1.spec,
                                'm' = p,
                                'n' = n,
                                'pStudy' = pStudy,
-                               'pGuess' = pRandom,
-                               'pi' = pi),
+                               'pGuess' = pRandom
+                               ),
                    n.chains = nchains)
 
 # Collect samples to approximate the posterior distribution.
@@ -91,6 +90,7 @@ model1samples = coda.samples(jagsmodel1,
 # Add your analyses based on the collected samples here:
 mcmcsummary_model1 = summary(model1samples)
 mcmcsummary_model1 $ statistics
+plotPost(model1samples)
 
 #----------   Model 2: exam scores with individual differences   --------------
 
