@@ -15,7 +15,7 @@ m = 15
 a = 40
 b = 10
 pStudy = rbeta(1,a,b)
-cat(pStudy, " this is our actual probability of studying")
+cat(pStudy, " this is our actual probability for pStudy")
 pRandom = 0.5
 #result vector
 k <- rep(0,m)
@@ -67,7 +67,7 @@ exammodel1.spec = textConnection(exammodel1.string)
 niter = 10000
 nchains = 4
 a_hat = 1
-b_hat = 100000000000000000
+b_hat = 1
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel1 <- jags.model(exammodel1.spec,
@@ -76,14 +76,13 @@ jagsmodel1 <- jags.model(exammodel1.spec,
                                'b_hat' = b_hat,
                                'm' = p,
                                'n' = n,
-                               'pStudy' = pStudy,
                                'pGuess' = pRandom
                                ),
                    n.chains = nchains)
 
 # Collect samples to approximate the posterior distribution.
 model1samples = coda.samples(jagsmodel1,
-                           c('pStudy'), # which variables do you want to model
+                           c('group'), # which variables do you want to model
                            n.iter = niter)
 
 
@@ -106,13 +105,27 @@ require(coda)
 n = 40
 k = c(19, 20, 16, 23, 22, 30, 38, 29, 34, 35, 35, 32, 37, 36, 33)
 p = length(k)
+kappa = 0.05
+pGuess = 0.5
+a_hat = 1
+b_hat = 1
 
 
 # THE MODEL
 exammodel2.string = "
   model {
     ## Prior
+  meanPStudy ~ dbeta(a_hat,b_hat)
 
+  for(i in 1:p){
+  group[i] ~ dbern(0.5)
+  alpha[i] = meanPStudy*kappa
+  beta[i] = (1-meanPStudy)*kappa
+  pStudy[i] ~ dbeta(alpha[i],beta[i])
+  theta[i] <- ifelse(group[i]==0,pGuess,pStudy[i])
+  k[i] ~ dbin(theta[i],n)  
+
+  }
     
 
     ## Likelihood    
@@ -131,18 +144,25 @@ mcmciterations = 1000
 jagsmodel2 <- jags.model(exammodel2.spec,
                          data = list('k' = k,
                                      'n' = n,
-                                     'p' = p),
+                                     'p' = p,
+                                     'kappa' = kappa,
+                                     'pGuess' = pGuess,
+                                     'a_hat' = a_hat,
+                                     'b_hat' = b_hat
+                                     ),
                          n.chains = 4)
 
 # Collect samples to approximate the posterior distribution.
 model2samples = coda.samples(jagsmodel2,
-                           c(''), # which variables do you want to monitor?
+                           c('theta'), # which variables do you want to monitor?
                            n.iter = mcmciterations)
 
 
 # Add your analyses on the collected samples here:
 
-
+mcmcsummary_model2 = summary(model2samples)
+mcmcsummary_model2 $ statistics
+plotPost(model2samples)
 
 #----------   Model 3: easy and difficult questions   --------------
 
