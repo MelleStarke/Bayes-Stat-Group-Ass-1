@@ -10,20 +10,47 @@ source("DBDA2E-utilities.R")
 
 #------------------------   Model 1: exam scores   ----------------------------
 
+n = 40
+m = 15
+pStudy = 0.8
+pRandom = 0.5
+#result vector
+results <- rep(0,m)
+#repeat for 15 students
+for(i in 1:m){
+  #choose group: 0 = guessing, 1 = studied
+  group <- sample(x=c(0,1),size=1,prob=c(0.5,0.5))
+  
+  #switch on group
+  if(group==0){            #guessing
+    pCorrect <- pRandom
+  }
+  else{                    #studying
+    pCorrect <- pStudy
+  }
+  #generate amount of correct answers
+  correctAnswers <- rbinom(n=1,size=n,prob=pCorrect)
+  results[i] <- correctAnswers
+}
+
+hist(results,10)
 
 # THE DATA
 n = 40
 k = c(19, 20, 16, 23, 22, 30, 38, 29, 34, 35, 35, 32, 37, 36, 33)
 p = length(k)
-
+pi <- c(0.5,0.5)
 
 # THE MODEL
 exammodel1.string = "
   model {
-    ## Prior
+  for(i in 1:m){
+  group[i] ~ dcat(pi)
+  
+  theta[i] <- equals(group[i],0)*pGuess + equals(group[i],1)*pStudy
+  k[i] ~ dbin(theta[i],n)  
 
-
-    ## Likelihood
+  }
   }
 "
 
@@ -34,21 +61,28 @@ exammodel1.spec = textConnection(exammodel1.string)
 niter = 10000
 nchains = 4
 
+pStudy_hat <- 0.5
+pGuess_hat <- 0.5
+
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel1 <- jags.model(exammodel1.spec,
                    data = list('k' = k,
+                               'm' = p,
                                'n' = n,
-                               'p' = p),
+                               'pStudy' = pStudy,
+                               'pGuess' = pRandom,
+                               'pi' = pi),
                    n.chains = nchains)
 
 # Collect samples to approximate the posterior distribution.
 model1samples = coda.samples(jagsmodel1,
-                           c(''), # which variables do you want to model
+                           c('group'), # which variables do you want to model
                            n.iter = niter)
 
 
 # Add your analyses based on the collected samples here:
-
+mcmcsummary_model1 = summary(model1samples)
+mcmcsummary_model1 $ statistics
 
 #----------   Model 2: exam scores with individual differences   --------------
 
