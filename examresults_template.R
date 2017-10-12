@@ -101,6 +101,7 @@ rm(list=ls())  # Careful! This clears all of R's memory!
 # Required packages for this exercise (you may add more if you want to).
 require(rjags)
 require(coda)
+source("DBDA2E-utilities.R")
 
 # THE DATA
 n = 40
@@ -108,9 +109,12 @@ k = c(19, 20, 16, 23, 22, 30, 38, 29, 34, 35, 35, 32, 37, 36, 33)
 p = length(k)
 kappa = 0.05
 pGuess = 0.5
-a_hat = 1
-b_hat = 1
+a_hat = 40
+b_hat = 10
 
+
+# With respect to the last exercise, we now sample a mean from a beta distribution
+# Consequently, given this mean and precision kappa, we sample individual succes rates for the group that studied
 
 # THE MODEL
 exammodel2.string = "
@@ -125,7 +129,6 @@ exammodel2.string = "
   pStudy[i] ~ dbeta(alpha[i],beta[i])
   theta[i] <- ifelse(group[i]==0,pGuess,pStudy[i])
   k[i] ~ dbin(theta[i],n)  
-
   }
     
 
@@ -139,7 +142,7 @@ exammodel2.string = "
 exammodel2.spec = textConnection(exammodel2.string)
 
 # SAMPLING PARAMETERS
-mcmciterations = 1000
+mcmciterations = 100
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel2 <- jags.model(exammodel2.spec,
@@ -155,9 +158,11 @@ jagsmodel2 <- jags.model(exammodel2.spec,
 
 # Collect samples to approximate the posterior distribution.
 model2samples = coda.samples(jagsmodel2,
-                           c('theta'), # which variables do you want to monitor?
+                           c('pStudy'), # which variables do you want to monitor?
                            n.iter = mcmciterations)
 
+
+# @DAN WE GET THE SLICER STUCK AT VALUE WITH INFIN. DENSITY KINDA AT RANDOM. I PLAYED AROUND WITH DIFFERENT VALUES BUT IT SEEMS TO BE RANDOM.
 
 # Add your analyses on the collected samples here:
 
