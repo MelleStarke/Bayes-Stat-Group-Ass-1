@@ -117,6 +117,7 @@ pGuess = 0.5
 # THE MODEL
 exammodel2.string = "
   model {
+  for(i in 1:p){
     group[i] ~ dbern(0.5)
 }
   meanPStudy ~ dunif(0.5,1)
@@ -166,31 +167,56 @@ plotPost(model2samples)
 # Optional generic preliminaries:
 graphics.off() # This closes all of R's graphics windows.
 rm(list=ls())  # Careful! This clears all of R's memory!
-
 n = 10
 m = 20
+pGuess = 0.5
 
 k1 = matrix(0L, nrow = n, ncol = m)
 
-k1[1,] = c( 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0)
-k1[2,] = c( 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-k1[3,] = c( 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
-k1[4,] = c( 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-k1[5,] = c( 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0)
-k1[6,] = c( 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0)
-k1[7,] = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
-k1[8,] = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-k1[9,] = c( 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1)
+k1[1,]  = c( 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0)
+k1[2,]  = c( 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+k1[3,]  = c( 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
+k1[4,]  = c( 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+k1[5,]  = c( 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0)
+k1[6,]  = c( 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0)
+k1[7,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
+k1[8,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+k1[9,]  = c( 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1)
 k1[10,] = c( 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
 
 
 # THE MODEL
 exammodel3.string = "
   model {
-    ## Prior
 
+##Choose groups for students##
+    for(i in 1:n){
+    group[i] ~ dbern(0.5)
+    }
 
-    ## Likelihood  
+##probabilities for questions being answered correctly##
+    for(i in 1:m){
+      q[i] ~ dunif(0,1)
+    }
+
+  meanPStudy ~ dunif(0.5,1)
+  kappa ~ dpois(15)
+  alpha = meanPStudy*kappa
+  beta = (1-meanPStudy)*kappa
+  
+  
+  for(i in 1:n){
+    ##probability theta of student i getting a question right##
+    pStudy[i] ~ dbeta(alpha,beta)
+    theta[i] = equals(group[i],0)*pGuess + equals(group[i],1)*pStudy[i]
+    }
+  
+  for(i in 1:n){                     ##n is student, m is question##
+    for(j in 1:m){
+      prob[i,j] = q[j]*theta[i]
+      k[i,j] ~ dbern(prob[i,j])
+    }
+  }
   }
 "
 
@@ -205,16 +231,20 @@ mcmciterations = 1000
 jagsmodel3 <- jags.model(exammodel3.spec,
                          data = list('k' = k1, 
                                      'n' = n,
-                                     'm' = m),
+                                     'm' = m,
+                                     'pGuess' = pGuess
+                                     ),
                          n.chains = 4)
 
 # Collect samples to approximate the posterior distribution.
 model3samples = coda.samples(jagsmodel3,
-                             c(''), # which variables do you want to monitor
+                             c('q'), # which variables do you want to monitor
                              n.iter = mcmciterations)
 
 # Add your analyses on the collected samples here:
-
+mcmcsummary_model3 = summary(model3samples)
+mcmcsummary_model3 $ statistics
+plotPost(model3samples)
 
 #----------   Model 4: differences between groups   --------------
 
