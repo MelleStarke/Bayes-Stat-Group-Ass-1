@@ -101,6 +101,7 @@ rm(list=ls())  # Careful! This clears all of R's memory!
 # Required packages for this exercise (you may add more if you want to).
 require(rjags)
 require(coda)
+source("DBDA2E-utilities.R")
 
 # THE DATA
 n = 40
@@ -110,12 +111,12 @@ pGuess = 0.5
 
 
 
+# With respect to the last exercise, we now sample a mean from a beta distribution
+# Consequently, given this mean and precision kappa, we sample individual succes rates for the group that studied
+
 # THE MODEL
 exammodel2.string = "
   model {
-
-for(i in 1:p){
-    
     group[i] ~ dbern(0.5)
 }
   meanPStudy ~ dunif(0.5,1)
@@ -138,7 +139,7 @@ for(i in 1:p){
 exammodel2.spec = textConnection(exammodel2.string)
 
 # SAMPLING PARAMETERS
-mcmciterations = 1000
+mcmciterations = 100
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel2 <- jags.model(exammodel2.spec,
@@ -151,9 +152,8 @@ jagsmodel2 <- jags.model(exammodel2.spec,
 
 # Collect samples to approximate the posterior distribution.
 model2samples = coda.samples(jagsmodel2,
-                           c('group'), # which variables do you want to monitor?
+                           c('pStudy'), # which variables do you want to monitor?
                            n.iter = mcmciterations)
-
 
 # Add your analyses on the collected samples here:
 
