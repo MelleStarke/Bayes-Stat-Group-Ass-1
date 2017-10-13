@@ -106,32 +106,31 @@ require(coda)
 n = 40
 k = c(19, 20, 16, 23, 22, 30, 38, 29, 34, 35, 35, 32, 37, 36, 33)
 p = length(k)
-kappa = 0.05
 pGuess = 0.5
-a_hat = 1
-b_hat = 1
+
 
 
 # THE MODEL
 exammodel2.string = "
   model {
-    ## Prior
-  meanPStudy ~ dbeta(a_hat,b_hat)
 
+for(i in 1:p){
+    
+    group[i] ~ dbern(0.5)
+}
+  meanPStudy ~ dunif(0.5,1)
+  kappa ~ dpois(15)
+  alpha = meanPStudy*kappa
+  beta = (1-meanPStudy)*kappa
+  
+  
   for(i in 1:p){
-  group[i] ~ dbern(0.5)
-  alpha[i] = meanPStudy*kappa
-  beta[i] = (1-meanPStudy)*kappa
-  pStudy[i] ~ dbeta(alpha[i],beta[i])
-  theta[i] <- ifelse(group[i]==0,pGuess,pStudy[i])
-  k[i] ~ dbin(theta[i],n)  
+    pStudy[i] ~ dbeta(alpha,beta)
+    theta[i] = equals(group[i],0)*pGuess + equals(group[i],1)*pStudy[i]
+  
+    k[i] ~ dbin(theta[i],n)  
 
-  }
-    
-
-    ## Likelihood    
-
-    
+   }
   }
 "
 
@@ -146,16 +145,13 @@ jagsmodel2 <- jags.model(exammodel2.spec,
                          data = list('k' = k,
                                      'n' = n,
                                      'p' = p,
-                                     'kappa' = kappa,
-                                     'pGuess' = pGuess,
-                                     'a_hat' = a_hat,
-                                     'b_hat' = b_hat
+                                     'pGuess' = pGuess
                                      ),
                          n.chains = 4)
 
 # Collect samples to approximate the posterior distribution.
 model2samples = coda.samples(jagsmodel2,
-                           c('theta'), # which variables do you want to monitor?
+                           c('group'), # which variables do you want to monitor?
                            n.iter = mcmciterations)
 
 
