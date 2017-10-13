@@ -170,6 +170,9 @@ rm(list=ls())  # Careful! This clears all of R's memory!
 n = 10
 m = 20
 pGuess = 0.5
+a_hat = 1
+b_hat = 1
+q = rep(0.2,m)
 
 k1 = matrix(0L, nrow = n, ncol = m)
 
@@ -184,6 +187,24 @@ k1[8,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 k1[9,]  = c( 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1)
 k1[10,] = c( 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
 
+#for 2.3.3
+
+k2 = matrix(0L, nrow = n, ncol = m)
+
+k2[1,]  = c( 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0)
+k2[2,]  = c( 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+k2[3,]  = c( 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
+k2[4,]  = c( 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+k2[5,]  = c( 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0)
+k2[6,]  = c( 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0)
+k2[7,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
+k2[8,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+k2[9,]  = c( 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1)
+k2[10,] = c( 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
+
+k2[1,13] = NA
+k2[8,5]  = NA
+k2[10,18]= NA
 
 # THE MODEL
 exammodel3.string = "
@@ -196,7 +217,7 @@ exammodel3.string = "
 
 ##probabilities for questions being answered correctly##
     for(i in 1:m){
-      q[i] ~ dunif(0,1)
+      q[i] ~ dbeta(a_hat,b_hat)
     }
 
   meanPStudy ~ dunif(0.5,1)
@@ -229,16 +250,19 @@ mcmciterations = 1000
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel3 <- jags.model(exammodel3.spec,
-                         data = list('k' = k1, 
+                         data = list('k' = k2, 
                                      'n' = n,
                                      'm' = m,
-                                     'pGuess' = pGuess
+                                     'pGuess' = pGuess,
+                                     'a_hat' = a_hat,
+                                     'b_hat' = b_hat
                                      ),
                          n.chains = 4)
 
 # Collect samples to approximate the posterior distribution.
 model3samples = coda.samples(jagsmodel3,
-                             c('q'), # which variables do you want to monitor
+                             c('k[1,13]','k[8,5]','k[10,18]'),
+                             #c('q'), # which variables do you want to monitor
                              n.iter = mcmciterations)
 
 # Add your analyses on the collected samples here:
