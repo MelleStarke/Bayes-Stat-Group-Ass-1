@@ -1,4 +1,11 @@
 
+# STUDENT NAMES
+#
+#
+# Edwin Wenink s4156072
+#
+
+
 # Optional generic preliminaries:
 graphics.off() # This closes all of R's graphics windows.
 rm(list=ls())  # Careful! This clears all of R's memory!
