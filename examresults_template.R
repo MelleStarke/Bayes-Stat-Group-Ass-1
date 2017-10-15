@@ -170,6 +170,10 @@ mcmcsummary_model2 $ statistics
 plotPost(model2samples)
 
 #----------   Model 3: easy and difficult questions   --------------
+# Required packages for this exercise (you may add more if you want to).
+require(rjags)
+require(coda)
+source("DBDA2E-utilities.R")
 
 # Optional generic preliminaries:
 graphics.off() # This closes all of R's graphics windows.
@@ -208,7 +212,6 @@ k2[7,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)
 k2[8,]  = c( 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 k2[9,]  = c( 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1)
 k2[10,] = c( 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0)
-
 k2[1,13] = NA
 k2[8,5]  = NA
 k2[10,18]= NA
@@ -232,7 +235,6 @@ exammodel3.string = "
   alpha = meanPStudy*kappa
   beta = (1-meanPStudy)*kappa
   
-  
   for(i in 1:n){
     ##probability theta of student i getting a question right##
     pStudy[i] ~ dbeta(alpha,beta)
@@ -255,9 +257,11 @@ exammodel3.spec = textConnection(exammodel3.string)
 # SAMPLING PARAMETERS
 mcmciterations = 1000
 
+# NOTE: select either k = k1 or k = k2 in the following model
+
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
 jagsmodel3 <- jags.model(exammodel3.spec,
-                         data = list('k' = k2, 
+                         data = list('k' = k1, 
                                      'n' = n,
                                      'm' = m,
                                      'pGuess' = pGuess,
@@ -268,8 +272,9 @@ jagsmodel3 <- jags.model(exammodel3.spec,
 
 # Collect samples to approximate the posterior distribution.
 model3samples = coda.samples(jagsmodel3,
-                             c('k[1,13]','k[8,5]','k[10,18]'),
-                             #c('q'), # which variables do you want to monitor
+                             #c('k[1,13]','k[8,5]','k[10,18]'),
+                             #c('q'), # question succes rates
+                             c('pStudy'), # individual student success rates
                              n.iter = mcmciterations)
 
 # Add your analyses on the collected samples here:
