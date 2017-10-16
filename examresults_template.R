@@ -288,6 +288,10 @@ plotPost(model3samples)
 graphics.off() # This closes all of R's graphics windows.
 rm(list=ls())  # Careful! This clears all of R's memory!
 
+require(rjags)
+require(coda)
+source("DBDA2E-utilities.R")
+
 n1 = 50
 n2 = 49
 k1 = 37
@@ -296,23 +300,27 @@ k2 = 48
 
 
 # THE MODEL
-exammodel3.string = "
+exammodel4.string = "
 model {
   ## Prior 
-
+theta1 ~ dunif(0,1)
+theta2 ~ dunif(0,1)
   ## Likelihood
+  k1 ~ dbin(theta1, n1)
+  k2 ~ dbin(theta2, n2)
+  delta = abs(theta1-theta2)
 }
 "
 
 
 # JAGS usually reads models from a text file; here we use a string as a fake file.   
-exammodel3.spec = textConnection(exammodel3.string)
+exammodel4.spec = textConnection(exammodel4.string)
 
 # SAMPLING PARAMETERS
 mcmciterations = 1000
 
 # Construct the object containing both the model specification as well as the data and some sampling parameters.
-jagsmodel3 <- jags.model(exammodel3.spec,
+jagsmodel4 <- jags.model(exammodel4.spec,
                          data = list('k1' = k1,
                                      'k2' = k2,
                                      'n1' = n1,
@@ -320,10 +328,12 @@ jagsmodel3 <- jags.model(exammodel3.spec,
                          n.chains = 4)
 
 # Collect samples to approximate the posterior distribution.
-model3samples = coda.samples(jagsmodel3,
-                             c(''), # which variables do you want to monitor
+model4samples = coda.samples(jagsmodel4,
+                             c('delta','theta1','theta2'), # which variables do you want to monitor
                              n.iter = mcmciterations)
 
 # Add your analyses on the collected samples here:
-
+mcmcsummary_model4 = summary(model4samples)
+mcmcsummary_model4 $ statistics
+plotPost(model4samples[,1])
 
