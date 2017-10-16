@@ -293,7 +293,7 @@ require(coda)
 source("DBDA2E-utilities.R")
 
 n1 = 50
-n2 = 49
+n2 = 63
 k1 = 37
 k2 = 48
 
@@ -336,4 +336,5 @@ model4samples = coda.samples(jagsmodel4,
 mcmcsummary_model4 = summary(model4samples)
 mcmcsummary_model4 $ statistics
 plotPost(model4samples[,1])
+
 
